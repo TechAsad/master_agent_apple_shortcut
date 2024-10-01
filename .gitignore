@@ -1,0 +1,12 @@
+
+mastervenv/
+# Ignore environment variable files
+.env
+
+
+
+
+
+# Ignore any other unwanted files or directories
+__pycache__/
+
