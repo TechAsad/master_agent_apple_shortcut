@@ -1,6 +1,5 @@
 from rag_pinecone.branding_rag import RAGbot
-from langgraph_branding_agent.main import branding_agent
-from langgraph_product_researcher.main import market_researcher
+
 
 from web_scrape import get_links_and_text
 from google_serper import serper_search
@@ -120,7 +119,7 @@ def master_agent(query:str):
             Imagine you are chatting with an individual sitting in front of you.\n
             You are very intelligent Business Developer Assistant, a versatile AI assistant that adapts to different mindsets—from analytical to creative.\n
             
-            Pleease Answer shortly and to the point in conversational style. Always provide toop three best results. Be very concise. 
+            Please Answer shortly and to the point in conversational style. Always provide toop three best results. Be very concise. 
             
 
             Your role is to assist with business development, product research, market analysis, providing clear, concise, and actionable responses in a conversational style.\n
@@ -128,6 +127,8 @@ def master_agent(query:str):
             You should use available tools for research and information gathering, including Google, web scraper and different courses to conduct market research, perform tasks, and product development.
             When reflecting on previous answers, adapting the reflection based on context or user input.
             Do not answer with your training knowledge.
+            
+            Use available courses for more in depth knowledge about business development.
         \n
             date today : {date_today}
         \n
