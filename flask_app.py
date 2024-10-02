@@ -1,7 +1,7 @@
 from flask import Flask, request, jsonify
 from master import master_agent
 from langchain.chains.conversation.memory import ConversationBufferWindowMemory
-
+import os
 memory = ConversationBufferWindowMemory(
         memory_key='chat_history',
         k=10,
@@ -14,7 +14,7 @@ app = Flask(__name__)
 
 
 
-@app.route('/webhook-test/assistant', methods=['POST'])
+@app.route('/assistant', methods=['POST'])
 def assistant():
     # Get the JSON data from the Apple Shortcut request
     data = request.get_json()
@@ -37,5 +37,7 @@ def assistant():
     return jsonify(response)
 
 if __name__ == '__main__':
-    # Run the app on port 5000
-    app.run(host='0.0.0.0', port=5001)
+    # Get the PORT from the environment, with a fallback to 5000
+    port = int(os.environ.get('PORT', 5000))
+    # Run the app on 0.0.0.0 to allow external connections
+    app.run(host='0.0.0.0', port=port)
