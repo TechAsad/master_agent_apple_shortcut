@@ -11,9 +11,6 @@ memory = ConversationBufferWindowMemory(
 
 app = Flask(__name__)
 
-
-
-
 @app.route('/assistant', methods=['POST'])
 def assistant():
     # Get the JSON data from the Apple Shortcut request
