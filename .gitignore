@@ -1,5 +1,6 @@
 
 mastervenv/
+newenv/
 # Ignore environment variable files
 .env
 

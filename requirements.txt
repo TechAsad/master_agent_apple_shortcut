@@ -18,7 +18,9 @@ gunicorn
 
 jsonpatch==1.33
 jsonpath-python==1.0.6
-
+async
+async-timeout
+asyncpraw
 
 langchain-community==0.2.3
 langchain-core
