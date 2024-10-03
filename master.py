@@ -36,7 +36,7 @@ os.environ['TAVILY_API_KEY'] = os.getenv("TAVILY_API_KEY")
 # initialize LLM (we use ChatOpenAI because we'll later define a `chat` agent)
 llm = ChatOpenAI(
         
-        temperature=0.4,
+        temperature=0.1,
         model_name='gpt-4o-mini'
 )
 
