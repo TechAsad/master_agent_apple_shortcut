@@ -20,7 +20,7 @@ def reddit_agent(query):
     output = app.invoke({"query":query})  # Replace with actual invoke logic
     comments = output['comments']
 
-
+    return comments
 
 
 
