@@ -68,3 +68,4 @@ tokenizers==0.15.0
 
 supervisor
 flask
+python-Levenshtein

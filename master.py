@@ -185,7 +185,7 @@ The goal is to guide you efficiently while being responsive to your direction.
 
     agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=True)
     result = agent_executor.invoke({"input": query})
-    conversational_memory.save_context({"Human": query}, {"AI": result['output']})
+    conversational_memory.save_context({"Me": query}, {"You": result['output']})
     
     return result['output']
 
