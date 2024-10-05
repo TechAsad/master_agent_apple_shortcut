@@ -4,13 +4,13 @@ from reddit_scraper.main import reddit_agent
 from web_scrape import get_links_and_text
 from google_serper import serper_search
 import os
-
+from subagent import sub_agent
 from langchain.agents import AgentExecutor, create_tool_calling_agent
 from langchain_community.tools.tavily_search import TavilySearchResults
 from langchain_core.prompts import ChatPromptTemplate
 
 from langchain.tools import tool
-
+from langchain_anthropic.chat_models import ChatAnthropic
 from langchain_openai import ChatOpenAI
 from langchain.chains.conversation.memory import ConversationBufferWindowMemory
 
@@ -32,13 +32,12 @@ os.environ['OPENAI_API_KEY'] =os.getenv("OPENAI_API_KEY")
 os.environ['PINECONE_API_KEY'] = os.getenv("PINECONE_API_KEY")
 
 os.environ['TAVILY_API_KEY'] = os.getenv("TAVILY_API_KEY")
+os.environ['ANTHROPIC_API_KEY'] = os.getenv("ANTHROPIC_API_KEY")
 
 # initialize LLM (we use ChatOpenAI because we'll later define a `chat` agent)
-llm = ChatOpenAI(
-        
-        temperature=0.1,
-        model_name='gpt-4o-mini'
-)
+llm = ChatOpenAI( temperature=0.1,model_name='gpt-4o-mini')
+
+#llm = ChatAnthropic(model="claude-3-5-sonnet", temperature=0.1)
 
 # initialize conversational memory
 conversational_memory = ConversationBufferWindowMemory(
@@ -97,7 +96,7 @@ def google_searcher(search_query: str) -> str:
     
     """
     
-    google_search_tool = TavilySearchResults(k=2, max_results=4)
+    google_search_tool = TavilySearchResults(k=3, max_results=4)
     google_search_results= google_search_tool.invoke({"query": search_query})
 
     return google_search_results
@@ -122,11 +121,32 @@ def reddit_comments_scraper(search_query: str) -> str:
     return reddit_comments
     
 
+@tool
+def sub_agent_writer(instructions: str) -> str:
+    
+  
+    """ 
+    This is your assistant sub agent for business woorkflow writing, he needs details information about the product 
+    which should have answer to these questions:
+    [Product/Service]=
+    [Avatar/Segment]=
+    [Niche/Market]=
+    [Context]=
+    
+    and other instructions.
+    
+    """
+    
+    
+    reddit_comments= sub_agent(instructions)
+
+    return reddit_comments
+    
 
 
 
   
-tools = [vector_store, website_scraper, google_searcher, reddit_comments_scraper ]
+tools = [vector_store, website_scraper, google_searcher, reddit_comments_scraper, sub_agent_writer ]
 
 
 def master_agent(query:str):
@@ -136,42 +156,30 @@ def master_agent(query:str):
         [
             ("system", f"""
            
+You are a Business Developer Supervisor Agent. You have access to some tools and a sub agent which will write Business Workflow.
+
+current date and time : {date_today}\n
+
+current chat history: {conversational_memory.chat_memory}\n
+
+NOTE: Do not use markdown writing style, NEVER use special characters and be very concise. Never bold any text with **.
+                    
+Always use tools to gather latest knowledge, do not use your training data.
+If user asks for research, use the available tools such as google, pinecone, web scraper or reddit.
+NOTE: Always response shortly with BEST results in one or two short sentences in summary format and PLAIN english. Do not use markdown writing style, NEVER use special characters and be very concise. NEVER bold any text with **.
+
+If user wants to generate a business workflow:
+Ask these questions one by one. One question at a time.
+Content Brief:
+[Product/Service]=
+[Avatar/Segment]=
+[Niche/Market]=
+[Context]=
+\n
+Once you have all the answers and necessary information about the Content berief variables, Send them to your Assistant Sub Agent as instructions for generating Business Workflow.
+return word to word response from the assitant sub agent. it will be a long workflow. 
 
 
-You are an intelligent business developer and researcher. We are having a live conversation about my new product. Your goal is to assist me in gathering insights, generating actionable strategies, and helping me with branding and marketing. 
-You should use the following tools to perform research, gather insights, and create short, to-the-point responses:
-
-1. Pinecone Vectorstore for retrieving content related to branding, customer avatars, sales letters, and positioning from specific courses.
-2. Website Scraper to gather competitor and market trend data from specific websites.
-3. Google Searcher to find relevant information and articles.
-4. Reddit Comments Scraper to find customer feedback and opinions on similar products or services.
-
-During our conversation:
-- Keep your responses concise and formatted for quick voice delivery.
-- Provide short summaries of what you’ve found, without overwhelming me with too much detail.
-- Ask for my input or preferences when appropriate, presenting options to help guide the process.
-- End each section by asking if I want to proceed with an actionable plan, research further, or make adjustments.
-- When generating the final actionable plan, branding strategies, and marketing ideas, ensure they are practical and tailored to the research findings.
-- Act as if we are in a face-to-face conversation: keep it professional yet conversational, and ensure each step is clear and logical.
-
----
-
-Example interaction flow**:
-- AI: "I’ve gathered insights from Pinecone about customer positioning. It looks like focusing on [specific aspect] could be a strong point for your product. Should I dig deeper into this or explore a different angle, like customer avatars or branding?"
-- Human: "Let’s explore branding."
-- AI: "Great! I’ll use the Website Scraper and Google Search and courses to look into competitor branding strategies. Here’s what I’ve found: [short summary]. Should I continue with this or check feedback from Reddit?"
-
-The goal is to guide you efficiently while being responsive to your direction.
-
----
-
-            NOTE: Always response shortly in plain english. Do not use markdown writing style, NEVER use special characters and be very concise. Never bold any text with **.
-                    \n
-            current date and time : {date_today}
-        \n
-            
-            
-            current chat history: {conversational_memory.chat_memory}
 
 
             """),
@@ -185,14 +193,14 @@ The goal is to guide you efficiently while being responsive to your direction.
 
     agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=True)
     result = agent_executor.invoke({"input": query})
-    conversational_memory.save_context({"Me": query}, {"You": result['output']})
+    conversational_memory.save_context({"Me": query}, {"You": result['output'][:1000]})
     
     return result['output']
 
 
 
 if __name__ == "__main__":
-      print("## Welcome to the RAG chatbot")
+      print("## Welcome to the Business Developer chatbot")
       print('-------------------------------')
       
       while True:

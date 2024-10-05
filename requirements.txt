@@ -21,14 +21,14 @@ jsonpath-python==1.0.6
 async
 async-timeout
 asyncpraw
-
-langchain-community==0.2.3
+langchain-anthropic
+langchain-community
 langchain-core
 
-langchain-openai==0.1.8
+langchain-openai
 langchain-pinecone
 langchain-text-splitters
-langchain==0.2.8 
+langchain
 langchain_community
 langchainhub
 langgraph==0.0.64
@@ -46,8 +46,8 @@ playwright==1.45.0
 praw==7.7.1
 psutil
 pyTelegramBotAPI
-pydantic==2.5.3
-pydantic_core==2.14.6
+pydantic
+pydantic_core
 pydub
 
 pypdf==3.17.4
