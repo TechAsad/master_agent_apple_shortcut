@@ -11,7 +11,7 @@ from langchain_core.prompts import ChatPromptTemplate
 
 from langchain.tools import tool
 from langchain_anthropic.chat_models import ChatAnthropic
-from langchain_openai import ChatOpenAI
+from langchain_openai.chat_models import ChatOpenAI
 from langchain.chains.conversation.memory import ConversationBufferWindowMemory
 
 from langchain.agents import initialize_agent
@@ -37,13 +37,12 @@ os.environ['ANTHROPIC_API_KEY'] = os.getenv("ANTHROPIC_API_KEY")
 # initialize LLM (we use ChatOpenAI because we'll later define a `chat` agent)
 llm = ChatOpenAI( temperature=0.1,model_name='gpt-4o-mini')
 
-#llm = ChatAnthropic(model="claude-3-5-sonnet", temperature=0.1)
+#llm = ChatAnthropic(model="claude-3-5-sonnet-20240620", temperature=0.1, max_tokens_to_sample=5000)
 
 # initialize conversational memory
 conversational_memory = ConversationBufferWindowMemory(
         memory_key='chat_history',
-        k=15,
-        return_messages=True
+        k=15
 )
 
 
@@ -156,11 +155,11 @@ def master_agent(query:str):
         [
             ("system", f"""
            
-You are a Business Developer Supervisor Agent. You have access to some tools and a sub agent which will write Business Workflow.
+You are a Business Developer Supervisor Agent. You have access to some tools and a sub agent write which will write Business Workflow.
 
 current date and time : {date_today}\n
 
-current chat history: {conversational_memory.chat_memory}\n
+
 
 NOTE: Do not use markdown writing style, NEVER use special characters and be very concise. Never bold any text with **.
                     
@@ -168,19 +167,19 @@ Always use tools to gather latest knowledge, do not use your training data.
 If user asks for research, use the available tools such as google, pinecone, web scraper or reddit.
 NOTE: Always response shortly with BEST results in one or two short sentences in summary format and PLAIN english. Do not use markdown writing style, NEVER use special characters and be very concise. NEVER bold any text with **.
 
-If user wants to generate a business workflow:
-Ask these questions one by one. One question at a time.
-Content Brief:
-[Product/Service]=
-[Avatar/Segment]=
-[Niche/Market]=
-[Context]=
 \n
-Once you have all the answers and necessary information about the Content berief variables, Send them to your Assistant Sub Agent as instructions for generating Business Workflow.
-return word to word response from the assitant sub agent. it will be a long workflow. 
+For the Assistant agent, ask these questions one by one from user before sending them to your assisttant agent. do not ask them again if they are already answered in chat history.
+\n
+Content Brief:
+Product/Service=
+Avatar/Segment=
+Niche/Market=
+Context=
+\n
+=>Once you have all the answers and necessary information for above variables, Send them to your Assistant Sub Agent as instructions for generating Business Workflow.
+=>return word to word response from the assitant sub agent. it will be a long workflow.\n  
 
-
-
+current chat: {conversational_memory.chat_memory}\n
 
             """),
             ("human", "{input}"),
@@ -193,9 +192,9 @@ return word to word response from the assitant sub agent. it will be a long work
 
     agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=True)
     result = agent_executor.invoke({"input": query})
-    conversational_memory.save_context({"Me": query}, {"You": result['output'][:1000]})
+    conversational_memory.save_context({"Human": query}, {"AI": result['output'][:1000]})
     
-    return result['output']
+    return result['output'] #[0]['text']
 
 
 

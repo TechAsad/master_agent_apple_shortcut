@@ -12,6 +12,7 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain.tools import tool
 
 from langchain_openai import ChatOpenAI
+from langchain_anthropic.chat_models import ChatAnthropic
 from langchain.chains.conversation.memory import ConversationBufferWindowMemory
 
 from langchain.agents import initialize_agent
@@ -32,14 +33,12 @@ os.environ['OPENAI_API_KEY'] =os.getenv("OPENAI_API_KEY")
 os.environ['PINECONE_API_KEY'] = os.getenv("PINECONE_API_KEY")
 
 os.environ['TAVILY_API_KEY'] = os.getenv("TAVILY_API_KEY")
+os.environ['ANTHROPIC_API_KEY'] = os.getenv("ANTHROPIC_API_KEY")
 
 # initialize LLM (we use ChatOpenAI because we'll later define a `chat` agent)
-llm = ChatOpenAI(
-        
-        temperature=0.1,
-        model_name='gpt-4o-mini'
-)
+#llm = ChatOpenAI(temperature=0.1,      model_name='gpt-4o-mini')
 
+llm = ChatAnthropic(model="claude-3-5-sonnet-20240620", temperature=0.1, max_tokens_to_sample=5000)
 # initialize conversational memory
 conversational_memory = ConversationBufferWindowMemory(
         memory_key='chat_history',
@@ -544,7 +543,7 @@ Execute command7
     result = agent_executor.invoke({"input": query})
     #conversational_memory.save_context({"Me": query}, {"You": result['output']})
     
-    return result['output']
+    return result['output'][0]['text']
 
 
 
