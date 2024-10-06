@@ -540,10 +540,11 @@ Execute command7
     agent = create_tool_calling_agent(llm, tools, prompt)
 
     agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=True)
-    result = agent_executor.invoke({"input": query})
+    results = agent_executor.invoke({"input": query})
+    result= results['output'][0]['text'] 
     #conversational_memory.save_context({"Me": query}, {"You": result['output']})
     
-    return result['output'][0]['text']
+    return result
 
 
 
