@@ -55,13 +55,14 @@ def search_subreddits(query, limit_per_word=5):
 
 
 ## Async function to fetch subreddits with a timeout
-async def get_top_and_new_posts_async(subreddit_name, limit=2, timeout=12):
+async def get_top_and_new_posts_async(subreddit_name, limit=15, timeout=15):
     subreddit = reddit.subreddit(subreddit_name)
     try:
         with async_timeout.timeout(timeout):
-            top_posts = await asyncio.to_thread(lambda: list(subreddit.top(limit=limit)))
+            #top_posts = await asyncio.to_thread(lambda: list(subreddit.top(limit=limit)))
             new_posts = await asyncio.to_thread(lambda: list(subreddit.new(limit=limit)))
-            return top_posts, new_posts
+            #return top_posts, new_posts
+            return new_posts
     except asyncio.TimeoutError:
         print(f"Timeout fetching posts from {subreddit_name}. Skipping...")
         return [], []
@@ -70,7 +71,7 @@ async def get_top_and_new_posts_async(subreddit_name, limit=2, timeout=12):
         return [], []
 
 ## Async function to get top-level comments (no nested comments)
-async def get_comments_from_post_async(post, limit=60):
+async def get_comments_from_post_async(post, limit=30):
     try:
         post.comments.replace_more(limit=0)  # Fetch only top-level comments
         comments = await asyncio.to_thread(lambda: [comment.body for comment in post.comments[:limit]])
@@ -80,7 +81,7 @@ async def get_comments_from_post_async(post, limit=60):
         return []
 
 ## Async function to scrape comments for multiple subreddits concurrently
-async def scrape_reddit_comments_async(subreddits, timeout=5):
+async def scrape_reddit_comments_async(subreddits, timeout=15):
     all_comments = []
     failed_subreddits = []
     
@@ -104,16 +105,18 @@ async def scrape_reddit_comments_async(subreddits, timeout=5):
     return all_comments
 
 ## Async function to scrape a single subreddit
-async def scrape_subreddit_async(subreddit_name, timeout=12):
+async def scrape_subreddit_async(subreddit_name, timeout=15):
     print(f"Scraping subreddit: {subreddit_name}")
-    top_posts, new_posts = await get_top_and_new_posts_async(subreddit_name, timeout=timeout)
+    #top_posts, 
+    new_posts = await get_top_and_new_posts_async(subreddit_name, timeout=timeout)
     
-    if not top_posts and not new_posts:  # Skip if no posts were retrieved
+    #if not top_posts and not new_posts:
+    if not new_posts:# Skip if no posts were retrieved
         return subreddit_name, []
     
     # Process top and new posts
     all_comments = []
-    for post in top_posts + new_posts:
+    for post in new_posts: # top_posts + new_posts:
         comments = await get_comments_from_post_async(post, limit=60)  # Fetch up to 60 comments
         all_comments.extend(comments)
     
@@ -132,11 +135,13 @@ async def reddit_comments_async(sub_reddits):
     else:
         print(f"No comments scraped from {subreddits}.")
     
-    return comments
+    return comments[:250]
 
 # Running the async scraper
 def reddit_comments(sub_reddits):
     return asyncio.run(reddit_comments_async(sub_reddits))
+
+
 
 
 

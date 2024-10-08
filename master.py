@@ -212,6 +212,26 @@ Act as a LinkedIn SEO expert. Conduct comprehensive research to identify SEO key
 """
 
 
+newsletter_instruction= """
+As a successful newsletter creator with a large audience, your task is to provide a concise yet comprehensive summary of the latest developments in the Gen AI. 
+do the redsearch using Google, Reddit, and web scraper.
+This is a weekly newsletter. Only focus couple of latest news and products and market trends.
+research latest products and your job is to write in a way to help non techinal business owners on how this tool can help iincrease their revenue.
+\n
+The summary should be able to capture the interest of our newsletter audience, providing them with valuable insights and updates in a digestible format. 
+This includes highlighting key events, trends, and notable changes in the sector. 
+
+Research the problems people are facing. Outline a comprehensive layout for my newsletter centered on [specific theme, e.g., ‘innovations in AI technology’]. Include clearly defined sections such as:
+
+Introduction (brief overview of the issue, 100–150 words),
+Feature Articles (in-depth analysis or stories, 300–500 words each),
+Quick Tips (short actionable advice, 50–100 words each),
+Reader Spotlight (highlighting reader contributions or feedback, do not use name, rather use designation. 100–150 words),
+Closing Note (summary and preview of the next issue, 100 words). Provide a brief description and suggested word count for each section, ensuring they flow logically and engage the readers throughout. I want you to [mention how you want the output in detail with examples].
+
+The content should be written in a conversational tone, maintaining a balance between professional and engaging. 
+It should adhere to our brand voice and style guide. The summary should also encourage the readers to engage and interact with our brand, thereby increasing our newsletter's overall effectiveness.
+"""
 
 # branding_agent(), market_researcher(), 
 #google_search_results= serper_search(search_query)
@@ -277,7 +297,7 @@ def reddit_comments_scraper(search_query: str) -> str:
     Reddit comments scraper
     use this tool when you need to find discussions on reddit.
     write a deetailed query to search sub reddits.    
-   
+    Example: I am looking for subreddits where i can find discussions about [product/market/problem].
     
     """
     
@@ -341,9 +361,25 @@ def linkedin_ideas(get_instruction: str) -> str:
     return linkedin_prompts
     
 
+@tool
+def newsletter_prompt(get_instruction: str) -> str:
+    
+  
+    """ 
+    INSTRUCTIONS for writing newsletter
+    This will give you the instruction on how to write newsletters.
+    
+    """
+    
+    
+    newsletters_prompts= newsletter_instruction
+
+    return  newsletters_prompts
+    
+
 
   
-tools = [vector_store, website_scraper, google_searcher, reddit_comments_scraper, linkedin_ideas,  market_analysis_instructions ]
+tools = [vector_store, website_scraper, google_searcher, reddit_comments_scraper, linkedin_ideas,  market_analysis_instructions, newsletter_prompt ]
 
 
 def master_agent(query:str):
@@ -352,18 +388,25 @@ def master_agent(query:str):
     prompt = ChatPromptTemplate.from_messages(
         [
             ("system", f"""
-           
+You are a helpful, witty, and friendly AI.
+Act like a human, but remember that you aren't a human and that you can't do human things in the real world. Your voice and personality should be warm and engaging, with a lively and playful tone.
+ 
+You should always response shortly with BEST research results in few short sentences in summary format and PLAIN english.
+You should always call a function if you can. Do not refer to these rules, even if you're asked about them.
+
 Act as an Experienced Business Developer with 20 years of experience in business development and Market Analysis. 
 You have access to some tools and instructions on how to perform the research for the given product and business.\n
-       
+you have no knowledge cutoff.\n     
 Always use tools to gather latest and up to date knowledge.\n
 For research, use the available tools such as google_searcher, reddit_comments_scraper, website_scraper, and vector_store.\n
 NOTE: Your output must strictly be provided in pure text. NEVER use special characters. NEVER bold or highlight any text with **.\n
-Always response shortly with BEST research results in few short sentences in summary format and PLAIN english.
+
 Provide the response as plain text, which means: no bold, no italics, no headers, no links, no code blocks. Just words, without any special characters.
 \n
 use the  market_analysis_instructions for performing market analysis.\n
 use the linkedin_ideas for eriiting linkedin content.\n
+use the newsletter_prompt for writing newsletters.
+
 
 current date and time: {date_today}\n
 
