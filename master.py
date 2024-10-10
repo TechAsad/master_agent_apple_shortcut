@@ -423,7 +423,7 @@ current chat history:\n {conversational_memory.chat_memory}\n
 
     agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=True)
     result = agent_executor.invoke({"input": query})
-    conversational_memory.save_context({"Me": query}, {"You": result['output'][:1000]})
+    conversational_memory.save_context({"Me": query}, {"You": result['output'][:2500]})
     
     return result['output']
 
